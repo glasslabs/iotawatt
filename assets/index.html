@@ -1,0 +1,88 @@
+<div class="iotawatt">
+    <div id="iotawattChart"></div>
+    <div class="current"><span class="number"></span><span class="unit">kW</span></div>
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    <script>
+        function loadChart() {
+            iotaWattChart = Highcharts.chart('iotawattChart', {
+                series: iotaWattSeries,
+
+                chart: {
+                    backgroundColor: "#000",
+                    polar: true,
+                    type: 'line'
+                },
+
+                colors: ["#aaa", "#bbb", "#ccc"],
+
+                exporting: {
+                    enabled: false
+                },
+
+                credits: {
+                    enabled: false
+                },
+
+                title: {
+                    text: null
+                },
+
+                subtitle: {
+                    text: null
+                },
+
+                pane: {
+                    size: '100%',
+                    innerSize: '60%'
+                },
+
+                legend: {
+                    enabled: false
+                },
+
+                xAxis: {
+                    visible: false,
+                    tickmarkPlacement: 'on'
+                },
+
+                yAxis: {
+                    visible: false,
+                    min: 0,
+                    endOnTick: false,
+                    reversedStacks: false
+                },
+
+                plotOptions: {
+                    line: {
+                        marker: {
+                            enabled: false
+                        },
+                        lineWidth: 1,
+                    },
+                    series: {
+                        animation: false,
+                        shadow: false,
+                        pointPlacement: 'on',
+                        enableMouseTracking: false
+                    }
+                }
+            });
+        }
+
+        function waitForHighcharts(){
+            if(typeof Highcharts === "undefined"){
+                setTimeout(waitForHighcharts, 250);
+            } else {
+                loadChart()
+            }
+        }
+
+        waitForHighcharts();
+
+        let iotaWattSeries = [{"data":[[1654768800, 0.1]]}];
+        let iotaWattChart;
+    </script>
+</div>
