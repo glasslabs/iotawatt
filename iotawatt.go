@@ -17,9 +17,7 @@ import (
 	"github.com/glasslabs/looking-glass/module/types"
 )
 
-const (
-	apiQueryPath = "query"
-)
+const apiQueryPath = "query"
 
 // Config is the module configuration.
 type Config struct {
@@ -127,9 +125,7 @@ func (m *Module) run() {
 			return
 		}
 
-		f := strconv.FormatFloat(current, 'f', 1, 64)
-		_, err = m.ui.Eval("document.querySelector('#%s .current .number').innerText = '%s'", m.name, f)
-		if err != nil {
+		if err = m.renderCurrent(current); err != nil {
 			m.log.Error("Could not update current", "module", "iotawatt", "id", m.name, "error", err.Error())
 		}
 		if _, err = m.ui.Eval("iotaWattSeries = %s", string(b)); err != nil {
@@ -166,6 +162,16 @@ func (m *Module) renderHTML(path string) error {
 	}
 
 	_, err = m.ui.Eval("invokeModuleScripts(%q)", m.name)
+	return err
+}
+
+func (m *Module) renderCurrent(n float64) error {
+	w := int(n)
+	d := int(n*10) - (w * 10)
+
+	ws := strconv.Itoa(w)
+	ds := strconv.Itoa(d)
+	_, err := m.ui.Eval("document.querySelector('#%s .current').innerHTML = '%s<sel>.%s kW</sel>'", m.name, ws, ds)
 	return err
 }
 
