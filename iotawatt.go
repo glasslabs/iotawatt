@@ -30,7 +30,7 @@ type Config struct {
 // NewConfig creates a default configuration for the module.
 func NewConfig() *Config {
 	return &Config{
-		Interval: 2 * time.Second,
+		Interval: time.Second,
 	}
 }
 
@@ -56,7 +56,7 @@ func New(_ context.Context, cfg *Config, info types.Info, ui types.UI) (io.Close
 		"missing":    []string{"null"},
 		"begin":      []string{"s-1h"},
 		"end":        []string{"s"},
-		"group":      []string{"auto"},
+		"group":      []string{"20s"},
 	}
 	inputs := append([]string{"time.utc.unix"}, cfg.Inputs...)
 	qryValues.Set("select", "["+strings.Join(inputs, ",")+"]")
@@ -112,9 +112,9 @@ func (m *Module) run() {
 		for _, row := range raw {
 			var curr float64
 			for i := 1; i <= l; i++ {
-				kw := row[i] / 1000
-				series[i-1].Data = append(series[i-1].Data, []float64{row[0], kw})
-				curr += kw
+				watt := row[i]
+				series[i-1].Data = append(series[i-1].Data, []float64{row[0], watt})
+				curr += watt
 			}
 			current = curr
 		}
@@ -165,13 +165,30 @@ func (m *Module) renderHTML(path string) error {
 	return err
 }
 
-func (m *Module) renderCurrent(n float64) error {
-	w := int(n)
-	d := int(n*10) - (w * 10)
+func (m *Module) renderCurrent(watt float64) error {
+	const docSelector = "document.querySelector('#%s .current')"
+
+	unit := "W"
+	removeClass := "kW"
+	if watt > 100 {
+		unit = "kW"
+		removeClass = "W"
+		watt /= 1000
+	}
+
+	w := int(watt)
+	d := int(watt*10) - (w * 10)
 
 	ws := strconv.Itoa(w)
 	ds := strconv.Itoa(d)
-	_, err := m.ui.Eval("document.querySelector('#%s .current').innerHTML = '%s<sel>.%s kW</sel>'", m.name, ws, ds)
+	if _, err := m.ui.Eval(docSelector+".innerHTML = '%s<sel>.%s %s</sel>'", m.name, ws, ds, unit); err != nil {
+		return err
+	}
+	_, err := m.ui.Eval(docSelector+".classList.remove('%s')", m.name, removeClass)
+	if err != nil {
+		return err
+	}
+	_, err = m.ui.Eval(docSelector+".classList.add('%s')", m.name, unit)
 	return err
 }
 
