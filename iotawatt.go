@@ -30,7 +30,7 @@ type Config struct {
 // NewConfig creates a default configuration for the module.
 func NewConfig() *Config {
 	return &Config{
-		Interval: time.Second,
+		Interval: 5 * time.Second,
 	}
 }
 
@@ -56,7 +56,7 @@ func New(_ context.Context, cfg *Config, info types.Info, ui types.UI) (io.Close
 		"missing":    []string{"null"},
 		"begin":      []string{"s-1h"},
 		"end":        []string{"s"},
-		"group":      []string{"20s"},
+		"group":      []string{"auto"},
 	}
 	inputs := append([]string{"time.utc.unix"}, cfg.Inputs...)
 	qryValues.Set("select", "["+strings.Join(inputs, ",")+"]")
@@ -107,16 +107,20 @@ func (m *Module) run() {
 		}
 
 		l := len(m.cfg.Inputs)
+		rl := len(raw)
 		var current float64
+		for i := 1; i <= l; i++ {
+			current += raw[rl-1][i]
+		}
+
 		series := make([]series, l)
 		for _, row := range raw {
-			var curr float64
-			for i := 1; i <= l; i++ {
-				watt := row[i]
-				series[i-1].Data = append(series[i-1].Data, []float64{row[0], watt})
-				curr += watt
+			if int(row[0])%20 != 0 {
+				continue
 			}
-			current = curr
+			for j := 1; j <= l; j++ {
+				series[j-1].Data = append(series[j-1].Data, []float64{row[0], row[j]})
+			}
 		}
 
 		b, err := json.Marshal(series)

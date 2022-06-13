@@ -45,6 +45,7 @@
 
                 xAxis: {
                     visible: false,
+                    reversed: true,
                     tickmarkPlacement: 'on'
                 },
 
@@ -72,8 +73,8 @@
             });
         }
 
-        function waitForHighcharts(){
-            if(typeof Highcharts === "undefined"){
+        function waitForHighcharts() {
+            if (typeof Highcharts === "undefined") {
                 setTimeout(waitForHighcharts, 250);
             } else {
                 loadChart()
@@ -82,7 +83,7 @@
 
         waitForHighcharts();
 
-        let iotaWattSeries = [{"data":[[1654768800, 0.1]]}];
+        let iotaWattSeries = [{"data": [[1654768800, 0.1]]}];
         let iotaWattChart;
     </script>
 </div>
