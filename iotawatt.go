@@ -100,10 +100,16 @@ func (m *Module) run() {
 	defer ticker.Stop()
 
 	for {
+		select {
+		case <-m.done:
+			return
+		case <-ticker.C:
+		}
+
 		var raw [][]float64
 		if err := m.request(c, &raw); err != nil {
 			m.log.Error("Could not get current IoTaWatt data", "module", "iotawatt", "id", m.name, "error", err.Error())
-			return
+			continue
 		}
 
 		l := len(m.cfg.Inputs)
@@ -123,27 +129,21 @@ func (m *Module) run() {
 			}
 		}
 
+		if err := m.renderCurrent(current); err != nil {
+			m.log.Error("Could not update current", "module", "iotawatt", "id", m.name, "error", err.Error())
+		}
+
 		b, err := json.Marshal(series)
 		if err != nil {
 			m.log.Error("could not encode data", "module", "iotawatt", "id", m.name, "error", err.Error())
-			return
+			continue
 		}
-
-		if err = m.renderCurrent(current); err != nil {
-			m.log.Error("Could not update current", "module", "iotawatt", "id", m.name, "error", err.Error())
-		}
+		
 		if _, err = m.ui.Eval("iotaWattSeries = %s", string(b)); err != nil {
 			m.log.Error("Could not update series", "module", "iotawatt", "id", m.name, "error", err.Error())
 		}
 		if _, err = m.ui.Eval("iotaWattChart.update({series: iotaWattSeries})"); err != nil {
 			m.log.Error("Could not update chart", "module", "iotawatt", "id", m.name, "error", err.Error())
-		}
-
-		select {
-		case <-m.done:
-			return
-		case <-ticker.C:
-			continue
 		}
 	}
 }
