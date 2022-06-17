@@ -30,7 +30,7 @@ type Config struct {
 // NewConfig creates a default configuration for the module.
 func NewConfig() *Config {
 	return &Config{
-		Interval: 5 * time.Second,
+		Interval: time.Minute,
 	}
 }
 
@@ -52,8 +52,8 @@ type Module struct {
 func New(_ context.Context, cfg *Config, info types.Info, ui types.UI) (io.Closer, error) {
 	qryValues := url.Values{
 		"format":     []string{"json"},
-		"resolution": []string{"high"},
-		"missing":    []string{"null"},
+		"resolution": []string{"low"},
+		"missing":    []string{"skip"},
 		"begin":      []string{"s-1h"},
 		"end":        []string{"s"},
 		"group":      []string{"auto"},
