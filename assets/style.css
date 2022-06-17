@@ -1,0 +1,25 @@
+.iotawatt {
+    position: relative;
+}
+
+.iotawatt, .iotawatt #iotawattChart{
+    width: 200px;
+    height: 200px;
+}
+
+.iotawatt .current {
+    color: #fff;
+    font-size: 1.4em;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.iotawatt .current.kW {
+    color: #fcb103;
+}
+
+.iotawatt .current sel {
+    font-size: 0.5em;
+}
