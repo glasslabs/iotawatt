@@ -138,11 +138,11 @@ func (m *Module) run() {
 			m.log.Error("could not encode data", "module", "iotawatt", "id", m.name, "error", err.Error())
 			continue
 		}
-		
+
 		if _, err = m.ui.Eval("iotaWattSeries = %s", string(b)); err != nil {
 			m.log.Error("Could not update series", "module", "iotawatt", "id", m.name, "error", err.Error())
 		}
-		if _, err = m.ui.Eval("iotaWattChart.update({series: iotaWattSeries})"); err != nil {
+		if _, err = m.ui.Eval("iotaWattChart.update({series: iotaWattSeries},true,true)"); err != nil {
 			m.log.Error("Could not update chart", "module", "iotawatt", "id", m.name, "error", err.Error())
 		}
 	}
